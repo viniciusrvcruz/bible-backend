@@ -7,24 +7,27 @@ use App\Models\Book;
 use App\Models\Chapter;
 use App\Models\Verse;
 use App\Services\Version\Interfaces\VersionImporterInterface;
-use InvalidArgumentException;
+use App\Exceptions\Version\VersionImportException;
 
 class ThiagoBodrukImporter implements VersionImporterInterface
 {
-    public function validate(string $content): void
+    public function parse(string $content): array
     {
-        $data = json_decode($content, true);
-
-        if(json_last_error() !== JSON_ERROR_NONE) {
-            throw new InvalidArgumentException('Invalid JSON: ' . json_last_error_msg());
-        }
+        $bom = pack('H*','EFBBBF');
+        $contentText = preg_replace("/^$bom/", '', $content);
+        $data = json_decode($contentText, true, 512, JSON_THROW_ON_ERROR);
 
         if(!is_array($data)) {
-            throw new InvalidArgumentException('JSON must be an array of books');
+            throw new VersionImportException('invalid_format', 'JSON must be an array of books');
         }
 
+        return $data;
+    }
+
+    public function validate(array $data): void
+    {
         if(count($data) !== 66) {
-            throw new InvalidArgumentException('Expected 66 books but got ' . count($data));
+            throw new VersionImportException('invalid_books_count', 'Expected 66 books but got ' . count($data));
         }
 
         foreach ($data as $index => $book) {
@@ -32,30 +35,29 @@ class ThiagoBodrukImporter implements VersionImporterInterface
             $bookName = BookNameEnum::cases()[$index] ?? null;
 
             if (empty($chapters) || !is_array($chapters)) {
-                throw new InvalidArgumentException("Book '{$bookName->value}' is missing 'chapters'");
+                throw new VersionImportException('missing_chapters', "Book '{$bookName->value}' is missing 'chapters'");
             }
 
             foreach ($chapters as $chapterIndex => $verses) {
                 $chapterNumber = $chapterIndex + 1;
 
                 if(!is_array($verses)) {
-                    throw new InvalidArgumentException("Chapter {$chapterNumber} in the book '{$bookName->value}' must be an array of verses.");
+                    throw new VersionImportException('invalid_chapter_format', "Chapter {$chapterNumber} in the book '{$bookName->value}' must be an array of verses.");
                 }
 
                 foreach ($verses as $verseIndex => $verse) {
                     $verseNumber = $verseIndex + 1;
 
                     if(!is_string($verse)) {
-                        throw new InvalidArgumentException("Verse {$verseNumber} in chapter {$chapterNumber} of the book '{$bookName->value}' must be a string.");
+                        throw new VersionImportException('invalid_verse_format', "Verse {$verseNumber} in chapter {$chapterNumber} of the book '{$bookName->value}' must be a string.");
                     }
                 }
             }
         }
     }
 
-    public function import(string $content, int $versionId): void
+    public function import(array $data, int $versionId): void
     {
-        $data = json_decode($content, true);
         $books = Book::all();
 
         foreach ($data as $index => $bookData) {

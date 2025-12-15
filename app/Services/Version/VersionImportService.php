@@ -3,27 +3,28 @@
 namespace App\Services\Version;
 
 use App\Models\Version;
+use App\Services\Version\DTOs\VersionImportDTO;
 use App\Services\Version\Factories\VersionImporterFactory;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use RuntimeException;
+use App\Exceptions\Version\VersionImportException;
 
 class VersionImportService
 {
-    public function import(string $filePath, string $importerName, string $versionName, string $copyright): Version
+    public function import(VersionImportDTO $dto): Version
     {
-        $content = Storage::get($filePath);
-        $importer = VersionImporterFactory::make($importerName);
+        $importer = VersionImporterFactory::make($dto->importerName);
 
-        $importer->validate($content);
+        $data = $importer->parse($dto->content);
 
-        return DB::transaction(function () use ($versionName, $copyright, $content, $importer) {
+        $importer->validate($data);
+
+        return DB::transaction(function () use ($dto, $data, $importer) {
             $version = Version::create([
-                'name' => $versionName,
-                'copyright' => $copyright,
+                'name' => $dto->versionName,
+                'copyright' => $dto->copyright,
             ]);
 
-            $importer->import($content, $version->id);
+            $importer->import($data, $version->id);
 
             $this->validateImport($version);
 
@@ -37,11 +38,11 @@ class VersionImportService
         $versesCount = $version->chapters()->withCount('verses')->get()->sum('verses_count');
 
         if ($chaptersCount !== 1189) {
-            throw new RuntimeException("Expected 1,189 chapters but got {$chaptersCount}");
+            throw new VersionImportException('invalid_chapters_count', "Expected 1,189 chapters but got {$chaptersCount}");
         }
 
         if ($versesCount < 31100 || $versesCount > 31110) {
-            throw new RuntimeException("Expected verses between 31,100 and 31,110 but got {$versesCount}");
+            throw new VersionImportException('invalid_verses_count', "Expected verses between 31,100 and 31,110 but got {$versesCount}");
         }
     }
 }

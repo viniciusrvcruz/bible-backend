@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\CustomException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,5 +16,19 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (Throwable $e) {
+
+            return response()->json([
+                'error' => $e instanceof CustomException ? $e->getError() : basename(get_class($e)),
+                'message' => $e->getMessage() ?: 'An unexpected error occurred',
+                'timestamp' => now()->toISOString(),
+                'errors' => is_callable([$e, 'errors']) ? $e->errors() : null,
+                // Include debug info only in non-production environments
+                'debug' => app()->environment('local', 'testing') ? [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString()
+                ] : null
+            ], $e->getCode() ?: 500);
+        });
     })->create();
