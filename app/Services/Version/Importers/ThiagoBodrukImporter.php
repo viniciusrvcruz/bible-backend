@@ -9,6 +9,11 @@ use App\Models\Verse;
 use App\Services\Version\Interfaces\VersionImporterInterface;
 use App\Exceptions\Version\VersionImportException;
 
+/**
+ * Special thanks to Thiago Bodruk for providing multiple Bible versions
+ * in JSON format. You can access the repository here:
+ * https://github.com/thiagobodruk/bible/tree/master/json
+ */
 class ThiagoBodrukImporter implements VersionImporterInterface
 {
     public function parse(string $content): array
