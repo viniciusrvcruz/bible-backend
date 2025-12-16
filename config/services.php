@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\Admin\AdminAuthProvider;
+use App\Enums\Auth\AdminAuthProvider;
 
 return [
 

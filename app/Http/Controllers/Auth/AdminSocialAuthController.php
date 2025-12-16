@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Auth;
 
-use App\Enums\Admin\AdminAuthProvider;
+use App\Enums\Auth\AdminAuthProvider;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\AdminSocialAuthService;
 use Illuminate\Http\JsonResponse;

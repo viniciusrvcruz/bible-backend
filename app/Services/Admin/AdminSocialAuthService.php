@@ -2,7 +2,7 @@
 
 namespace App\Services\Admin;
 
-use App\Enums\Admin\AdminAuthProvider;
+use App\Enums\Auth\AdminAuthProvider;
 use App\Models\Admin;
 use Laravel\Socialite\Facades\Socialite;
 

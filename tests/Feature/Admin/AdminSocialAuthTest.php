@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\Admin\AdminAuthProvider;
+use App\Enums\Auth\AdminAuthProvider;
 use App\Models\Admin;
 use App\Models\User;
 use Laravel\Socialite\Contracts\Provider;
