@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\Admin\AdminAuthProvider;
+use App\Enums\Auth\AdminAuthProvider;
 use App\Models\Admin;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;

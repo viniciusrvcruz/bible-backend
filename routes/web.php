@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminSocialAuthController;
+use App\Http\Controllers\Auth\AdminSocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {

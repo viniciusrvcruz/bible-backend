@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Admin;
+namespace App\Enums\Auth;
 
 enum AdminAuthProvider: string
 {

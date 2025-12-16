@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\Admin\AdminAuthProvider;
+use App\Enums\Auth\AdminAuthProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
