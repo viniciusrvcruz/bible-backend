@@ -1,23 +1,30 @@
 <?php
 
 use App\Enums\VersionLanguageEnum;
+use App\Models\Chapter;
+use App\Models\Version;
 use Database\Seeders\BookSeeder;
 use Illuminate\Http\UploadedFile;
 
 beforeEach(function () {
     $this->seed(BookSeeder::class);
+
+    $this->validBibleData = function () {
+        $data = array_fill(0, 66, [
+            'chapters' => array_fill(0, 18, array_fill(0, 26, 'Sample verse text'))
+        ]);
+
+        $data[0]['chapters'][] = array_fill(0, 216, 'Sample verse text');
+
+        return json_encode($data);
+    };
 });
 
 describe('Version Import', function () {
     it('imports a valid bible version successfully', function () {
         $this->actAsAdmin();
 
-        $data = array_fill(0, 66, [
-            'chapters' => array_fill(0, 18, array_fill(0, 26, 'Sample verse text'))
-        ]);
-        $data[0]['chapters'][] = array_fill(0, 216, 'Sample verse text');
-
-        $validJson = json_encode($data);
+        $validJson = ($this->validBibleData)();
 
         $file = UploadedFile::fake()->createWithContent('bible.json', $validJson);
 
@@ -182,5 +189,61 @@ describe('Version Import', function () {
 
         $response->assertStatus(422);
         $response->assertJsonFragment(['error' => 'invalid_chapters_count']);
+    });
+
+    it('creates sequential positions across all chapters', function () {
+        $this->actAsAdmin();
+
+        $file = UploadedFile::fake()->createWithContent('bible.json', ($this->validBibleData)());
+
+        $response = $this->postJson('/api/admin/versions', [
+            'file' => $file,
+            'importer' => 'json_thiago_bodruk',
+            'name' => 'Position Test',
+            'language' => VersionLanguageEnum::ENGLISH->value,
+        ]);
+
+        $response->assertStatus(201);
+
+        $version = Version::where('name', 'Position Test')->first();
+        $positions = Chapter::where('version_id', $version->id)
+            ->orderBy('position')
+            ->pluck('position')
+            ->toArray();
+
+        expect($positions)->toBe(range(1, 1189));
+    });
+
+    it('allows same position in different versions', function () {
+        $this->actAsAdmin();
+
+        $validJson = ($this->validBibleData)();
+
+        $file1 = UploadedFile::fake()->createWithContent('bible1.json', $validJson);
+        $file2 = UploadedFile::fake()->createWithContent('bible2.json', $validJson);
+
+        $this->postJson('/api/admin/versions', [
+            'file' => $file1,
+            'importer' => 'json_thiago_bodruk',
+            'name' => 'Version 1',
+            'language' => VersionLanguageEnum::ENGLISH->value,
+        ])->assertStatus(201);
+
+        $this->postJson('/api/admin/versions', [
+            'file' => $file2,
+            'importer' => 'json_thiago_bodruk',
+            'name' => 'Version 2',
+            'language' => VersionLanguageEnum::ENGLISH->value,
+        ])->assertStatus(201);
+
+        $version1 = Version::where('name', 'Version 1')->first();
+        $version2 = Version::where('name', 'Version 2')->first();
+
+        $position1 = Chapter::where('version_id', $version1->id)->where('position', 1)->first();
+        $position2 = Chapter::where('version_id', $version2->id)->where('position', 1)->first();
+
+        expect($position1)->not->toBeNull()
+            ->and($position2)->not->toBeNull()
+            ->and($position1->id)->not->toBe($position2->id);
     });
 });

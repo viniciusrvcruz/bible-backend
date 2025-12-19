@@ -14,6 +14,7 @@ class VersionImporter
     {
         DB::transaction(function () use ($dto, $versionId) {
             $books = Book::all()->keyBy('name');
+            $globalPosition = 1;
 
             foreach ($dto->books as $bookDTO) {
                 $book = $books->get($bookDTO->name);
@@ -21,6 +22,7 @@ class VersionImporter
                 foreach ($bookDTO->chapters as $chapterDTO) {
                     $chapter = Chapter::create([
                         'number' => $chapterDTO->number,
+                        'position' => $globalPosition++,
                         'book_id' => $book->id,
                         'version_id' => $versionId,
                     ]);
