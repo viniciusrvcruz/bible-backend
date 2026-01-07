@@ -21,7 +21,7 @@ class VersionImportDTOFactory
 
         return new VersionImportDTO(
             files: $files,
-            importerName: $request->input('parser'),
+            adapterName: $request->input('adapter'),
             versionAbbreviation: $request->input('abbreviation'),
             versionName: $request->input('name'),
             language: $request->input('language'),

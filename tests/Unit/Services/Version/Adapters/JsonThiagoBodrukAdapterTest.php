@@ -1,16 +1,16 @@
 <?php
 
-use App\Services\Version\Parsers\JsonThiagoBodrukParser;
+use App\Services\Version\Adapters\JsonThiagoBodrukAdapter;
 use App\Services\Version\DTOs\FileDTO;
 use App\Services\Version\DTOs\VersionDTO;
 use App\Exceptions\Version\VersionImportException;
 
-describe('JsonThiagoBodrukParser', function () {
+describe('JsonThiagoBodrukAdapter', function () {
     beforeEach(function () {
-        $this->parser = new JsonThiagoBodrukParser();
+        $this->adapter = new JsonThiagoBodrukAdapter();
     });
 
-    it('parses valid json to DTO', function () {
+    it('adapts valid json to DTO', function () {
         $json = json_encode([
             ['name' => 'Gênesis', 'chapters' => [['Verse 1', 'Verse 2']]],
         ]);
@@ -23,7 +23,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $result = $this->parser->parse($files);
+        $result = $this->adapter->adapt($files);
 
         expect($result)->toBeInstanceOf(VersionDTO::class)
             ->and($result->books)->toHaveCount(1)
@@ -47,13 +47,13 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $result = $this->parser->parse($files);
+        $result = $this->adapter->adapt($files);
 
         expect($result)->toBeInstanceOf(VersionDTO::class);
     });
 
     it('throws exception for empty files array', function () {
-        $this->parser->parse([]);
+        $this->adapter->adapt([]);
     })->throws(VersionImportException::class, 'At least one file is required');
 
     it('throws exception for non-json file extension', function () {
@@ -67,7 +67,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $this->parser->parse($files);
+        $this->adapter->adapt($files);
     })->throws(VersionImportException::class, 'File must have .json extension');
 
     it('throws exception for missing book name', function () {
@@ -81,7 +81,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $this->parser->parse($files);
+        $this->adapter->adapt($files);
     })->throws(VersionImportException::class, "Book 0 must have a 'name' attribute");
 
     it('throws exception for invalid json', function () {
@@ -93,7 +93,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $this->parser->parse($files);
+        $this->adapter->adapt($files);
     })->throws(VersionImportException::class);
 
     it('throws exception for malformed json', function () {
@@ -105,7 +105,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $this->parser->parse($files);
+        $this->adapter->adapt($files);
     })->throws(VersionImportException::class);
 
     it('throws exception for book without chapters array', function () {
@@ -119,7 +119,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $this->parser->parse($files);
+        $this->adapter->adapt($files);
     })->throws(VersionImportException::class, 'must be an array of chapters');
 
     it('throws exception for non-array chapter', function () {
@@ -133,7 +133,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $this->parser->parse($files);
+        $this->adapter->adapt($files);
     })->throws(VersionImportException::class, 'must be an array');
 
     it('throws exception for non-string verse', function () {
@@ -147,6 +147,7 @@ describe('JsonThiagoBodrukParser', function () {
             )
         ];
 
-        $this->parser->parse($files);
+        $this->adapter->adapt($files);
     })->throws(VersionImportException::class, 'must be a string');
 });
+

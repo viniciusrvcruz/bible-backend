@@ -4,7 +4,7 @@ namespace App\Services\Version;
 
 use App\Models\Version;
 use App\Services\Version\DTOs\VersionImportDTO;
-use App\Services\Version\Factories\VersionParserFactory;
+use App\Services\Version\Factories\VersionAdapterFactory;
 use App\Services\Version\Validators\VersionValidator;
 use App\Services\Version\Importers\VersionImporter;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +18,9 @@ class VersionImportService
 
     public function import(VersionImportDTO $dto): Version
     {
-        $parser = VersionParserFactory::make($dto->importerName);
+        $adapter = VersionAdapterFactory::make($dto->adapterName);
 
-        $versionData = $parser->parse($dto->files);
+        $versionData = $adapter->adapt($dto->files);
 
         $this->validator->validateBeforeImport($versionData);
 

@@ -5,10 +5,11 @@ namespace App\Services\Version\Interfaces;
 use App\Services\Version\DTOs\FileDTO;
 use App\Services\Version\DTOs\VersionDTO;
 
-interface VersionParserInterface
+interface VersionAdapterInterface
 {
     /**
      * @param array<int, FileDTO> $files
      */
-    public function parse(array $files): VersionDTO;
+    public function adapt(array $files): VersionDTO;
 }
+

@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\VersionLanguageEnum;
-use App\Services\Version\Factories\VersionParserFactory;
+use App\Services\Version\Factories\VersionAdapterFactory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,10 +24,10 @@ class VersionRequest extends FormRequest
                 $isStore ? 'required' : 'prohibited',
                 'file'
             ],
-            'parser' => [
+            'adapter' => [
                 $isStore ? 'required' : 'prohibited',
                 'string',
-                Rule::in(VersionParserFactory::getAvailableFormats())
+                Rule::in(VersionAdapterFactory::getAvailableFormats())
             ],
             'abbreviation' => [
                 'required',
