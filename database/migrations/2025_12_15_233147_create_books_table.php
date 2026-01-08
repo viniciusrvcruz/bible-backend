@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\BookAbbreviationEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,6 +16,8 @@ return new class extends Migration
             $table->integer('order')->index();
 
             $table->unique(['version_id', 'abbreviation']);
+
+            $table->index(['version_id', 'order']);
         });
     }
 
