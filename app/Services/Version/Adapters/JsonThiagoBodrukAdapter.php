@@ -1,27 +1,45 @@
 <?php
 
-namespace App\Services\Version\Parsers;
+namespace App\Services\Version\Adapters;
 
-use App\Enums\BookNameEnum;
+use App\Enums\BookAbbreviationEnum;
 use App\Services\Version\DTOs\VersionDTO;
 use App\Services\Version\DTOs\BookDTO;
 use App\Services\Version\DTOs\ChapterDTO;
 use App\Services\Version\DTOs\VerseDTO;
-use App\Services\Version\Interfaces\VersionParserInterface;
+use App\Services\Version\Interfaces\VersionAdapterInterface;
 use App\Exceptions\Version\VersionImportException;
 
 /**
- * Parser for Thiago Bodruk's JSON format
+ * Adapter for Thiago Bodruk's JSON format
  * https://github.com/thiagobodruk/bible/tree/master/json
  */
-class JsonThiagoBodrukParser implements VersionParserInterface
+class JsonThiagoBodrukAdapter implements VersionAdapterInterface
 {
-    public function parse(string $content): VersionDTO
+    public function adapt(array $files): VersionDTO
     {
-        $data = $this->decodeJson($content);
+        if (empty($files)) {
+            throw new VersionImportException('no_files', 'At least one file is required');
+        }
+
+        $firstFile = $files[0];
+
+        if (strtolower($firstFile->extension) !== 'json') {
+            throw new VersionImportException('invalid_file_extension', 'File must have .json extension');
+        }
+
+        $data = $this->decodeJson($firstFile->content);
 
         $books = collect($data)->map(function ($book, $bookIndex) {
+            $bookName = $book['name'] ?? null;
             $bookChapters = $book['chapters'] ?? null;
+
+            if (!$bookName) {
+                throw new VersionImportException(
+                    'missing_book_name',
+                    "Book {$bookIndex} must have a 'name' attribute"
+                );
+            }
 
             if (!is_array($bookChapters)) {
                 throw new VersionImportException(
@@ -30,7 +48,7 @@ class JsonThiagoBodrukParser implements VersionParserInterface
                 );
             }
 
-            return $this->parseBook($bookChapters, $bookIndex);
+            return $this->parseBook($bookChapters, $bookName, $bookIndex);
         });
 
         return new VersionDTO($books);
@@ -48,9 +66,9 @@ class JsonThiagoBodrukParser implements VersionParserInterface
         }
     }
 
-    private function parseBook(array $bookChapters, int $index): BookDTO
+    private function parseBook(array $bookChapters, string $bookName, int $index): BookDTO
     {
-        $bookName = BookNameEnum::cases()[$index]->value;
+        $abbreviation = BookAbbreviationEnum::cases()[$index];
 
         $chapters = collect($bookChapters)->map(function ($verses, $chapterIndex) use ($bookName) {
             if (!is_array($verses)) {
@@ -63,7 +81,7 @@ class JsonThiagoBodrukParser implements VersionParserInterface
             return $this->parseChapter($verses, $chapterIndex, $bookName);
         });
 
-        return new BookDTO($bookName, $chapters);
+        return new BookDTO($bookName, $abbreviation, $chapters);
     }
 
     private function parseChapter(array $verses, int $chapterIndex, string $bookName): ChapterDTO
@@ -87,3 +105,4 @@ class JsonThiagoBodrukParser implements VersionParserInterface
         return new VerseDTO($verseIndex + 1, $text);
     }
 }
+

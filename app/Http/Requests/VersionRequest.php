@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\VersionLanguageEnum;
-use App\Services\Version\Factories\VersionParserFactory;
+use App\Services\Version\Factories\VersionAdapterFactory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,23 +15,30 @@ class VersionRequest extends FormRequest
         $versionId = $this->route('version');
 
         return [
-            'file' => [
+            'files' => [
+                $isStore ? 'required' : 'prohibited',
+                'array',
+                'min:1'
+            ],
+            'files.*' => [
                 $isStore ? 'required' : 'prohibited',
                 'file'
             ],
-            'parser' => [
+            'adapter' => [
                 $isStore ? 'required' : 'prohibited',
                 'string',
-                Rule::in(VersionParserFactory::getAvailableFormats())
+                Rule::in(VersionAdapterFactory::getAvailableAdapterNames())
+            ],
+            'abbreviation' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('versions', 'abbreviation')->where('language', $this->input('language'))->ignore($versionId)
             ],
             'name' => [
                 'required',
                 'string',
-                Rule::unique('versions', 'name')->where('language', $this->input('language'))->ignore($versionId)
-            ],
-            'full_name' => [
-                'required',
-                'string'
+                'max:255'
             ],
             'language' => [
                 'required',
@@ -40,7 +47,8 @@ class VersionRequest extends FormRequest
             ],
             'copyright' => [
                 'nullable',
-                'string'
+                'string',
+                'max:2000'
             ],
         ];
     }

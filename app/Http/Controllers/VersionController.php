@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\VersionRequest;
 use App\Http\Resources\VersionResource;
 use App\Models\Version;
-use App\Services\Version\DTOs\VersionImportDTO;
+use App\Services\Version\Factories\VersionImportDTOFactory;
 use App\Services\Version\VersionImportService;
 use Illuminate\Http\Response;
 
@@ -16,7 +16,6 @@ class VersionController extends Controller
     {
         $versions = Version::query()
             ->when(request('language'), fn($q, $lang) => $q->where('language', $lang))
-            ->withCount(['chapters', 'verses'])
             ->get();
 
         return VersionResource::collection($versions);
@@ -24,19 +23,13 @@ class VersionController extends Controller
 
     public function store(VersionRequest $request, VersionImportService $service)
     {
-        $dto = new VersionImportDTO(
-            content: $request->file('file')->getContent(),
-            importerName: $request->input('parser'),
-            versionName: $request->input('name'),
-            versionFullName: $request->input('full_name'),
-            language: $request->input('language'),
-            copyright: $request->input('copyright', ''),
-            fileExtension: $request->file('file')->getExtension(),
-        );
+        $dto = VersionImportDTOFactory::fromRequest($request);
 
         $version = $service->import($dto);
 
-        return VersionResource::make($version)->response()->setStatusCode(Response::HTTP_CREATED);
+        return VersionResource::make($version)
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function update(VersionRequest $request, Version $version)
