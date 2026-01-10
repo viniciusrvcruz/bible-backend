@@ -3,7 +3,6 @@
 use App\Services\Version\Validators\VersionValidator;
 use App\Services\Version\DTOs\{VersionDTO, BookDTO, ChapterDTO, VerseDTO};
 use App\Enums\BookAbbreviationEnum;
-use App\Models\Version;
 use App\Exceptions\Version\VersionImportException;
 
 describe('VersionValidator', function () {
@@ -11,79 +10,106 @@ describe('VersionValidator', function () {
         $this->validator = new VersionValidator();
     });
 
-    describe('validateBeforeImport', function () {
-        it('validates correct structure with 66 books', function () {
-            $books = collect(range(0, 65))->map(fn($i) => 
+    describe('validate', function () {
+        it('validates correct structure', function () {
+            $books = collect([
                 new BookDTO(
-                    "Book " . ($i + 1),
-                    BookAbbreviationEnum::cases()[$i],
+                    'Genesis',
+                    BookAbbreviationEnum::GEN,
                     collect([
                         new ChapterDTO(1, collect([new VerseDTO(1, 'Text')]))
                     ])
                 )
-            );
+            ]);
 
             $dto = new VersionDTO($books);
 
-            expect(fn() => $this->validator->validateBeforeImport($dto))->not->toThrow(Exception::class);
+            expect(fn() => $this->validator->validate($dto))->not->toThrow(Exception::class);
         });
 
-        it('throws exception for wrong books count', function () {
-            $books = collect([new BookDTO(
-                'Genesis',
-                BookAbbreviationEnum::GEN,
-                collect([
-                    new ChapterDTO(1, collect([new VerseDTO(1, 'Text')]))
-                ])
-            )]);
-
-            $this->validator->validateBeforeImport(new VersionDTO($books));
-        })->throws(VersionImportException::class, 'Expected 66 books but got 1');
-
         it('throws exception for book without chapters', function () {
-            $books = collect(range(0, 65))->map(fn($i) => 
+            $books = collect([
                 new BookDTO(
-                    "Book " . ($i + 1),
-                    BookAbbreviationEnum::cases()[$i],
+                    'Genesis',
+                    BookAbbreviationEnum::GEN,
                     collect()
                 )
-            );
+            ]);
 
-            $this->validator->validateBeforeImport(new VersionDTO($books));
+            $this->validator->validate(new VersionDTO($books));
         })->throws(VersionImportException::class, 'is missing chapters');
 
         it('throws exception for chapter without verses', function () {
-            $books = collect(range(0, 65))->map(fn($i) => 
+            $books = collect([
                 new BookDTO(
-                    "Book " . ($i + 1),
-                    BookAbbreviationEnum::cases()[$i],
+                    'Genesis',
+                    BookAbbreviationEnum::GEN,
                     collect([new ChapterDTO(1, collect())])
                 )
-            );
+            ]);
 
-            $this->validator->validateBeforeImport(new VersionDTO($books));
+            $this->validator->validate(new VersionDTO($books));
         })->throws(VersionImportException::class, 'is missing verses');
 
         it('throws exception for empty verse text', function () {
-            $books = collect(range(0, 65))->map(fn($i) => 
+            $books = collect([
                 new BookDTO(
-                    "Book " . ($i + 1),
-                    BookAbbreviationEnum::cases()[$i],
+                    'Genesis',
+                    BookAbbreviationEnum::GEN,
                     collect([
                         new ChapterDTO(1, collect([new VerseDTO(1, '   ')]))
                     ])
                 )
-            );
+            ]);
 
-            $this->validator->validateBeforeImport(new VersionDTO($books));
+            $this->validator->validate(new VersionDTO($books));
         })->throws(VersionImportException::class, 'has empty text');
-    });
 
-    describe('validateAfterImport', function () {
-        it('does not throw exception', function () {
-            $version = new Version();
+        it('throws exception when book is not an instance of BookDTO', function () {
+            $books = collect([
+                (object) [
+                    'name' => 'Genesis',
+                    'chapters' => collect()
+                ]
+            ]);
 
-            expect(fn() => $this->validator->validateAfterImport($version))->not->toThrow(Exception::class);
-        });
+            $dto = new VersionDTO($books);
+
+            $this->validator->validate($dto);
+        })->throws(VersionImportException::class, 'is not an instance of BookDTO');
+
+        it('throws exception when chapter is not an instance of ChapterDTO', function () {
+            $books = collect([
+                new BookDTO(
+                    'Genesis',
+                    BookAbbreviationEnum::GEN,
+                    collect([
+                        (object) ['number' => 1, 'verses' => collect()]
+                    ])
+                )
+            ]);
+
+            $dto = new VersionDTO($books);
+
+            $this->validator->validate($dto);
+        })->throws(VersionImportException::class, 'is not an instance of ChapterDTO');
+
+        it('throws exception when verse is not an instance of VerseDTO', function () {
+            $books = collect([
+                new BookDTO(
+                    'Genesis',
+                    BookAbbreviationEnum::GEN,
+                    collect([
+                        new ChapterDTO(1, collect([
+                            (object) ['number' => 1, 'text' => 'Text']
+                        ]))
+                    ])
+                )
+            ]);
+
+            $dto = new VersionDTO($books);
+
+            $this->validator->validate($dto);
+        })->throws(VersionImportException::class, 'is not an instance of VerseDTO');
     });
 });

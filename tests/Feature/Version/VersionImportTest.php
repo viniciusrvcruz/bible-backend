@@ -75,38 +75,6 @@ describe('Version Import', function () {
         ]);
     });
 
-    it('rejects import with invalid book count', function () {
-        $this->actAsAdmin();
-
-        $bookNames = array_slice($this->allBookNames, 0, 50);
-        
-        $invalidJson = json_encode(array_map(function ($name) {
-            return [
-                'name' => $name,
-                'chapters' => array_fill(0, 10, array_fill(0, 10, 'Verse'))
-            ];
-        }, $bookNames));
-
-        $file = UploadedFile::fake()->createWithContent('bible.json', $invalidJson);
-
-        $response = $this->postJson('/api/admin/versions', [
-            'files' => [$file],
-            'adapter' => 'json_thiago_bodruk',
-            'abbreviation' => 'Invalid Version',
-            'name' => 'Invalid Version Full Name',
-            'language' => VersionLanguageEnum::ENGLISH->value,
-        ]);
-
-
-        $response->assertStatus(422);
-        $response->assertJson([
-            'error' => 'invalid_books_count',
-            'message' => 'Expected 66 books but got ' . count($bookNames)
-        ]);
-
-        $this->assertDatabaseMissing('versions', ['abbreviation' => 'Invalid Version']);
-    });
-
     it('requires authentication', function () {
         $file = UploadedFile::fake()->create('bible.json');
 

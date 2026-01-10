@@ -22,7 +22,7 @@ class VersionImportService
 
         $versionData = $adapter->adapt($dto->files);
 
-        $this->validator->validateBeforeImport($versionData);
+        $this->validator->validate($versionData);
 
         return DB::transaction(function () use ($dto, $versionData) {
             $version = Version::create([
