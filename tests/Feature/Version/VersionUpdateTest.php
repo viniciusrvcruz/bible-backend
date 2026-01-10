@@ -8,27 +8,31 @@ describe('Version Update', function () {
         $this->actAsAdmin();
 
         $version = Version::factory()->create([
-            'name' => 'Old Name',
+            'abbreviation' => 'Old Abbreviation',
+            'name' => 'Old Full Name',
             'language' => VersionLanguageEnum::ENGLISH->value,
             'copyright' => 'Old Copyright',
         ]);
 
         $response = $this->putJson("/api/admin/versions/{$version->id}", [
-            'name' => 'New Name',
+            'abbreviation' => 'New Abbreviation',
+            'name' => 'New Full Name',
             'language' => VersionLanguageEnum::PORTUGUESE_BR->value,
             'copyright' => 'New Copyright',
         ]);
 
         $response->assertStatus(200);
         $response->assertJson([
-            'name' => 'New Name',
+            'abbreviation' => 'New Abbreviation',
+            'name' => 'New Full Name',
             'language' => VersionLanguageEnum::PORTUGUESE_BR->value,
             'copyright' => 'New Copyright',
         ]);
 
         $this->assertDatabaseHas('versions', [
             'id' => $version->id,
-            'name' => 'New Name',
+            'abbreviation' => 'New Abbreviation',
+            'name' => 'New Full Name',
             'language' => VersionLanguageEnum::PORTUGUESE_BR->value,
         ]);
     });
@@ -37,7 +41,9 @@ describe('Version Update', function () {
         $version = Version::factory()->create();
 
         $response = $this->putJson("/api/admin/versions/{$version->id}", [
-            'name' => 'New Name',
+            'abbreviation' => 'New Abbreviation',
+            'name' => 'New Full Name',
+            'language' => $version->language,
         ]);
 
         $response->assertStatus(401);
@@ -49,7 +55,9 @@ describe('Version Update', function () {
         $version = Version::factory()->create();
 
         $response = $this->putJson("/api/admin/versions/{$version->id}", [
-            'name' => 'New Name',
+            'abbreviation' => 'New Abbreviation',
+            'name' => 'New Full Name',
+            'language' => $version->language,
         ]);
 
         $response->assertStatus(401);

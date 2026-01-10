@@ -10,10 +10,14 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('version_id')->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->string('abbreviation')->index();
             $table->integer('order')->index();
 
-            $table->unique('name');
+            $table->unique(['version_id', 'abbreviation']);
+
+            $table->index(['version_id', 'order']);
         });
     }
 

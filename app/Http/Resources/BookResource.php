@@ -12,7 +12,9 @@ class BookResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'abbreviation' => $this->abbreviation,
             'order' => $this->order,
+            'chapters' => ChapterResource::collection($this->whenLoaded('chapters')),
         ];
     }
 }
