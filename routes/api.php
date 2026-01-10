@@ -10,15 +10,11 @@ Route::get('/versions', [VersionController::class, 'index']);
 
 Route::prefix('versions/{version}')->group(function () {
     Route::get('/books', [BookController::class, 'index']);
-    
-    Route::prefix('books/{abbreviation}')->group(function () {
-        Route::get('/chapters/{number}', [ChapterController::class, 'show']);
-    });
+
+    Route::get('/books/{abbreviation}/chapters/{number}', [ChapterController::class, 'show']);
 });
 
-Route::prefix('books/{abbreviation}')->group(function () {
-    Route::get('/chapters/{number}/comparison', [ChapterController::class, 'comparison']);
-});
+Route::get('/books/{abbreviation}/chapters/{number}/comparison', [ChapterController::class, 'comparison']);
 
 Route::prefix('admin')->middleware('auth:admins')->group(function () {
     Route::get('/me', fn (Request $request) => $request->user());
