@@ -112,8 +112,13 @@ class UsfmAdapter implements VersionAdapterInterface
             // Extract verse from \v marker
             if (str_starts_with($line, '\\v ')) {
                 preg_match('/^\\\v\s+(\d+)\s+(.+)$/', $line, $matches);
+                
+                if (!isset($matches[1]) || !isset($matches[2])) {
+                    continue; // Skip invalid verse format
+                }
+                
                 $verseNumber = (int) $matches[1];
-                $verseContent = $matches[2];
+                $verseContent = $matches[2] ?? '';
 
                 // Extract references and clean verse text, replacing references with {{slug}}
                 [$references, $cleanText] = $this->processReferences($verseContent);
@@ -144,7 +149,7 @@ class UsfmAdapter implements VersionAdapterInterface
 
     /**
      * Process references from verse text: extract references and replace with {{slug}} in text
-     * Format: \f + \fr 1:1 \ft texto da referência \f*
+     * Format: \f + \fr 1:1 \ft reference text \f*
      * Returns [references, cleanText]
      */
     private function processReferences(string $text): array
@@ -154,19 +159,28 @@ class UsfmAdapter implements VersionAdapterInterface
 
         // Pattern to match \f + \fr reference \ft text \f*
         // The pattern uses non-greedy matching to capture text until \f*
-        $pattern = '/\\\f\s*\+\s*\\\fr\s+([^\s\\\]+)\s+\\\ft\s+(.*?)\\\f\*/s';
+        // Updated to better capture reference text that may contain special characters
+        // Pattern allows for optional whitespace and captures text more reliably
+        // Made \ft whitespace optional to handle cases where there's no space after \ft
+        $pattern = '/\\\f\s*\+\s*\\\fr\s+([^\s\\\]+)\s+\\\ft\s*(.*?)\\\f\*/s';
 
         // Replace each reference with {{slug}} and extract reference data
         $cleanText = preg_replace_callback($pattern, function ($match) use (&$references, &$index) {
-            $referenceText = trim($match[2]); // texto da referência
+            // Ensure match[2] exists and is not null
+            if (!isset($match[2]) || $match[2] === null) {
+                return ''; // Remove if no text captured
+            }
 
-            if (empty($referenceText)) {
+            $referenceText = trim($match[2] ?? ''); // text of the reference
+
+            // Skip if text is empty or null after trimming
+            if (empty($referenceText) || $referenceText === '') {
                 return ''; // Remove if no text
             }
 
             $slug = (string) $index;
 
-            // Create reference DTO
+            // Create reference DTO - ensure text is never null
             $references->push(new VerseReferenceDTO(
                 slug: $slug,
                 text: $referenceText,

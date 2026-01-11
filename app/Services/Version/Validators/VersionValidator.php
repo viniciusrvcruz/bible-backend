@@ -6,6 +6,7 @@ use App\Services\Version\DTOs\VersionDTO;
 use App\Services\Version\DTOs\BookDTO;
 use App\Services\Version\DTOs\ChapterDTO;
 use App\Services\Version\DTOs\VerseDTO;
+use App\Services\Version\DTOs\VerseReferenceDTO;
 use App\Exceptions\Version\VersionImportException;
 
 class VersionValidator
@@ -40,6 +41,30 @@ class VersionValidator
 
                     if (empty(trim($verse->text))) {
                         throw new VersionImportException('empty_verse', "Verse {$verse->number} in chapter {$chapter->number} of book '{$book->name}' has empty text");
+                    }
+
+                    // Validate references
+                    foreach ($verse->references as $reference) {
+                        // Validate that each reference is an instance of VerseReferenceDTO
+                        if (!$reference instanceof VerseReferenceDTO) {
+                            throw new VersionImportException('invalid_reference_type', "Reference in verse {$verse->number} of chapter {$chapter->number} in book '{$book->name}' is not an instance of VerseReferenceDTO");
+                        }
+
+                        // Validate that reference slug is not empty or null
+                        if (empty($reference->slug) || $reference->slug === null) {
+                            throw new VersionImportException('empty_reference_slug', "Reference in verse {$verse->number} of chapter {$chapter->number} in book '{$book->name}' has empty or null slug");
+                        }
+
+                        // Validate that reference text is not empty or null
+                        if (empty($reference->text) || $reference->text === null) {
+                            throw new VersionImportException('empty_reference_text', "Reference with slug '{$reference->slug}' in verse {$verse->number} of chapter {$chapter->number} in book '{$book->name}' has empty or null text");
+                        }
+
+                        // Validate that reference slug exists in verse text
+                        $slugPlaceholder = '{{' . $reference->slug . '}}';
+                        if (strpos($verse->text, $slugPlaceholder) === false) {
+                            throw new VersionImportException('missing_slug_in_verse_text', "Reference with slug '{$reference->slug}' in verse {$verse->number} of chapter {$chapter->number} in book '{$book->name}' is missing its placeholder '{$slugPlaceholder}' in the verse text");
+                        }
                     }
                 }
             }
