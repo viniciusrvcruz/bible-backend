@@ -40,6 +40,7 @@
 - [Como Executar](#-como-executar)
 - [Endpoints da API](#-endpoints-da-api)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Documentação técnica (`docs/`)](#-documentação-técnica-docs)
 - [Comandos Úteis](#-comandos-úteis)
 - [Como Contribuir](#-como-contribuir)
 - [Contribuidores](#-contribuidores)
@@ -241,6 +242,16 @@ bibleasy-backend/
 ├── docker-compose.yml         # bible_api, PostgreSQL, Redis
 └── docker/php/                # Dockerfile e configs PHP
 ```
+
+---
+
+## 📚 Documentação técnica (`docs/`)
+
+Guias detalhados por área do sistema (fluxos, arquivos, extensão, env vars) para implementações futuras:
+
+**[docs/README.md](docs/README.md)** — documentação geral do projeto (`architecture/`, `api/`, `testing/`) e, por área, `docs/modules/`.
+
+Para assistentes de código, ver também **[AGENTS.md](AGENTS.md)**.
 
 ---
 

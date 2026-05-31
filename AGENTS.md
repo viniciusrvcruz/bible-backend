@@ -65,10 +65,9 @@ Adjust if your compose service name differs.
 
 ### Services, DTOs, factories, adapters
 
-- **Factory + Strategy** is the dominant pattern for:
-  - **Chapter content**: `ChapterSourceAdapterFactory::make($version)` → `ChapterSourceAdapterInterface` (`DatabaseChapterAdapter`, `ApiBibleChapterAdapter`).
-  - **Version import**: `VersionAdapterFactory` + `VersionAdapterInterface` implementations (USFM, JSON variants); pipeline uses DTOs → `VersionValidator` → `VersionImporter` / `VersionImportService`.
-- New external formats or sources should extend this pattern: **interface + adapter + factory registration**, not ad hoc conditionals scattered in controllers.
+- **Not every feature uses Actions or Factory + Strategy.** Support uses an injected `SupportServiceInterface`; version import uses `VersionImportService` directly; books/chapters use Actions. Match the nearest module in `app/Services/{Context}/`, not always the chapter flow.
+- **Factory + Strategy** applies where behavior **varies by config or format** (e.g. version import adapters, chapter text source adapters). Use **interface + adapter + factory** there; bind single implementations in `AppServiceProvider` when swapping backends (e.g. support).
+- Avoid ad hoc `if ($format === '…')` in controllers; centralize in the relevant factory or service.
 
 ### HTTP validation and DTOs
 
@@ -146,5 +145,8 @@ When adding endpoints, **mirror existing naming**, nesting, and middleware choic
 ## Related docs
 
 - Human-oriented overview, endpoints, and import pipeline: **`README.md`**.
+- **Deep-dive guides (Portuguese)** in **`docs/`** — start at [`docs/README.md`](docs/README.md):
+  - Project-wide (any feature): [architecture](./docs/architecture/overview.md), [exceptions/API](./docs/api/exceptions-and-responses.md), [testing](./docs/testing/overview.md)
+  - Domain modules: [`docs/modules/`](docs/modules/) — [chapters](./docs/modules/chapters/text-sources.md), [comparison](./docs/modules/chapters/comparison.md), [version import](./docs/modules/versions/import.md), [auth](./docs/modules/auth/authentication.md), [support](./docs/modules/support/integration.md)
 
 When in doubt, **find the closest existing feature** (chapter read, version import, support ticket) and **copy its layering** rather than introducing a new architectural style.
