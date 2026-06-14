@@ -44,7 +44,6 @@ Ver [modules/README.md](./modules/README.md).
 | Método | Rota | Doc do módulo |
 |--------|------|---------------|
 | `GET` | `/api/versions/{version}/books/{abbreviation}/chapters/{number}` | [chapters/text-sources.md](./modules/chapters/text-sources.md) |
-| `GET` | `/api/books/.../comparison` | [chapters/comparison.md](./modules/chapters/comparison.md) |
 | `POST/PUT/DELETE` | `/api/admin/versions` | [versions/import.md](./modules/versions/import.md) |
 | `POST` | `/api/support` | [support/integration.md](./modules/support/integration.md) |
 | `GET` | `/api/user`, `/api/admin/me`, `/auth/*` | [auth/authentication.md](./modules/auth/authentication.md) |

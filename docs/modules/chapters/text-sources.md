@@ -144,5 +144,4 @@ Editar `ApiBibleContentParser` e processadores em `Parsers/ApiBible/Processors/`
 ## Relacionado
 
 - [Importação de versões](../versions/import.md) — como popular o DB ou estrutura vazia para Api.Bible
-- [Comparação](./comparison.md) — outro endpoint que **não** usa estes adapters
 - [Testes](../../testing/overview.md) — busque exemplos em `tests/Feature/Chapter/`

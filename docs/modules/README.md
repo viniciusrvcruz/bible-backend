@@ -4,7 +4,7 @@ Documentação **por área do produto** — fluxos, adapters, env vars e extens�
 
 | Módulo | Documentos |
 |--------|------------|
-| `chapters/` | [text-sources.md](./chapters/text-sources.md) — leitura e fontes (DB / Api.Bible) · [comparison.md](./chapters/comparison.md) — comparação multi-versão |
+| `chapters/` | [text-sources.md](./chapters/text-sources.md) — leitura e fontes (DB / Api.Bible) |
 | `versions/` | [import.md](./versions/import.md) — importação admin (USFM / JSON) |
 | `auth/` | [authentication.md](./auth/authentication.md) — Sanctum e OAuth |
 | `support/` | [integration.md](./support/integration.md) — formulário e OlieFlow |

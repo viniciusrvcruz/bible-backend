@@ -16,8 +16,6 @@ Route::prefix('versions/{version}')->group(function () {
         ->middleware(['chapter.rate_limit', 'throttle:chapter']);
 });
 
-Route::get('/books/{abbreviation}/chapters/{number}/comparison', [ChapterController::class, 'comparison']);
-
 Route::prefix('admin')->middleware('auth:admins')->group(function () {
     Route::get('/me', fn (Request $request) => $request->user());
     Route::apiResource('versions', VersionController::class)->except(['index', 'show']);

@@ -192,7 +192,6 @@ docker compose exec bible_api php artisan admin:create admin@example.com
 | `GET` | `/api/versions` | Lista versões disponíveis |
 | `GET` | `/api/versions/{version}/books` | Lista livros de uma versão |
 | `GET` | `/api/versions/{version}/books/{abbreviation}/chapters/{number}` | Capítulo completo |
-| `GET` | `/api/books/{abbreviation}/chapters/{number}/comparison` | Comparação de capítulo entre versões |
 
 ### Autenticados (Admin)
 
