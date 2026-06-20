@@ -45,7 +45,7 @@ Rotas em `routes/web.php` (prefixo **sem** `/api`):
 | `GET` | `/api/admin/me` | `auth:admins` |
 | `POST/PUT/DELETE` | `/api/admin/versions` | `auth:admins` |
 
-Rotas de leitura bíblica (`versions`, `books`, `chapters`, `comparison`) e `POST /api/support` são **públicas**.
+Rotas de leitura bíblica (`versions`, `books`, `chapters`) e `POST /api/support` são **públicas**.
 
 ## Variáveis de ambiente
 
