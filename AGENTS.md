@@ -5,7 +5,7 @@ This document helps automated assistants and contributors understand **how this 
 ## What this project is
 
 - **REST API only** — No Blade views; JSON responses for a Bible reading app ([Bibleasy](https://bibleasy.com)).
-- **Domain**: biblical versions, books, chapters, verses, cross-references; optional multi-version chapter comparison; admin-managed version import (USFM / JSON); chapter content from **PostgreSQL** or **Api.Bible** depending on version configuration.
+- **Domain**: biblical versions, books, chapters, verses, cross-references; admin-managed version import (USFM / JSON); chapter content from **PostgreSQL** or **Api.Bible** depending on version configuration.
 - **Stack**: Laravel 12, PHP ^8.2, PostgreSQL, Redis (cache / rate limiting), Laravel Sanctum, Socialite for OAuth flows.
 
 ## Running commands
@@ -25,7 +25,7 @@ Adjust if your compose service name differs.
 
 | Area | Role |
 |------|------|
-| `app/Actions/` | Thin **use-case** classes with `execute(...)`. Controllers delegate here for orchestration (e.g. chapter fetch, book list, comparison). |
+| `app/Actions/` | Thin **use-case** classes with `execute(...)`. Controllers delegate here for orchestration (e.g. chapter fetch, book list). |
 | `app/Http/Controllers/` | HTTP layer: validate via Form Requests where needed, call Actions or Services, return API Resources or JSON. |
 | `app/Http/Requests/` | Validation + typed input; prefer `validated()` and small helpers like `toDTO()` when converting to DTOs. |
 | `app/Http/Resources/` | JSON shape for API responses. **Global**: `JsonResource::withoutWrapping()` is enabled in `AppServiceProvider` — responses are **not** wrapped in `data`. |
@@ -65,10 +65,9 @@ Adjust if your compose service name differs.
 
 ### Services, DTOs, factories, adapters
 
-- **Factory + Strategy** is the dominant pattern for:
-  - **Chapter content**: `ChapterSourceAdapterFactory::make($version)` → `ChapterSourceAdapterInterface` (`DatabaseChapterAdapter`, `ApiBibleChapterAdapter`).
-  - **Version import**: `VersionAdapterFactory` + `VersionAdapterInterface` implementations (USFM, JSON variants); pipeline uses DTOs → `VersionValidator` → `VersionImporter` / `VersionImportService`.
-- New external formats or sources should extend this pattern: **interface + adapter + factory registration**, not ad hoc conditionals scattered in controllers.
+- **Not every feature uses Actions or Factory + Strategy.** Support uses an injected `SupportServiceInterface`; version import uses `VersionImportService` directly; books/chapters use Actions. Match the nearest module in `app/Services/{Context}/`, not always the chapter flow.
+- **Factory + Strategy** applies where behavior **varies by config or format** (e.g. version import adapters, chapter text source adapters). Use **interface + adapter + factory** there; bind single implementations in `AppServiceProvider` when swapping backends (e.g. support).
+- Avoid ad hoc `if ($format === '…')` in controllers; centralize in the relevant factory or service.
 
 ### HTTP validation and DTOs
 
@@ -146,5 +145,8 @@ When adding endpoints, **mirror existing naming**, nesting, and middleware choic
 ## Related docs
 
 - Human-oriented overview, endpoints, and import pipeline: **`README.md`**.
+- **Deep-dive guides (Portuguese)** in **`docs/`** — start at [`docs/README.md`](docs/README.md):
+  - Project-wide (any feature): [architecture](./docs/architecture/overview.md), [exceptions/API](./docs/api/exceptions-and-responses.md), [testing](./docs/testing/overview.md)
+  - Domain modules: [`docs/modules/`](docs/modules/) — [chapters](./docs/modules/chapters/text-sources.md), [version import](./docs/modules/versions/import.md), [auth](./docs/modules/auth/authentication.md), [support](./docs/modules/support/integration.md)
 
 When in doubt, **find the closest existing feature** (chapter read, version import, support ticket) and **copy its layering** rather than introducing a new architectural style.

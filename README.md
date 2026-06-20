@@ -40,6 +40,7 @@
 - [Como Executar](#-como-executar)
 - [Endpoints da API](#-endpoints-da-api)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Documentação técnica (`docs/`)](#-documentação-técnica-docs)
 - [Comandos Úteis](#-comandos-úteis)
 - [Como Contribuir](#-como-contribuir)
 - [Contribuidores](#-contribuidores)
@@ -191,7 +192,6 @@ docker compose exec bible_api php artisan admin:create admin@example.com
 | `GET` | `/api/versions` | Lista versões disponíveis |
 | `GET` | `/api/versions/{version}/books` | Lista livros de uma versão |
 | `GET` | `/api/versions/{version}/books/{abbreviation}/chapters/{number}` | Capítulo completo |
-| `GET` | `/api/books/{abbreviation}/chapters/{number}/comparison` | Comparação de capítulo entre versões |
 
 ### Autenticados (Admin)
 
@@ -241,6 +241,16 @@ bibleasy-backend/
 ├── docker-compose.yml         # bible_api, PostgreSQL, Redis
 └── docker/php/                # Dockerfile e configs PHP
 ```
+
+---
+
+## 📚 Documentação técnica (`docs/`)
+
+Guias detalhados por área do sistema (fluxos, arquivos, extensão, env vars) para implementações futuras:
+
+**[docs/README.md](docs/README.md)** — documentação geral do projeto (`architecture/`, `api/`, `testing/`) e, por área, `docs/modules/`.
+
+Para assistentes de código, ver também **[AGENTS.md](AGENTS.md)**.
 
 ---
 
