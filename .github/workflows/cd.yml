@@ -12,6 +12,6 @@ jobs:
     steps:
       - name: Trigger deploy on Coolify
         run: |
-          curl --fail --request GET \
+          curl --fail --request POST \
             "${{ secrets.COOLIFY_WEBHOOK }}" \
             --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
